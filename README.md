@@ -86,3 +86,10 @@ Audit an `authorized_keys` file:
 ```bash
 python src/cli.py authorized-keys --file examples/authorized_keys_sample
 ```
+
+
+
+## Sample Reports
+
+- [SSH insecure configuration sample](docs/sample-reports/ssh-config-insecure-sample.md)
+- [Authorized keys sample](docs/sample-reports/authorized-keys-sample.md)
