@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+reports/*.json
+reports/*.md
+.coverage
+.pytest_cache/
+.ruff_cache/
+.DS_Store
