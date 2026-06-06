@@ -1,0 +1,4 @@
+# Risky SSH server configuration
+PermitRootLogin yes
+PasswordAuthentication yes
+PubkeyAuthentication yes

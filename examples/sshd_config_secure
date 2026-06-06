@@ -1,0 +1,5 @@
+# Secure SSH server configuration
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+AllowGroups ssh-users admins
