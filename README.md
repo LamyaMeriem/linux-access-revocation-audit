@@ -1,5 +1,8 @@
 # Linux Access Revocation Audit
 
+![CI](https://github.com/LamyaMeriem/linux-access-revocation-audit/actions/workflows/ci.yml/badge.svg)  
+
+
 ## Overview
 
 Linux Access Revocation Audit is a Python-based security audit project focused on detecting residual access paths on Linux servers after a contractor, provider, or external administrator leaves a project.
@@ -62,3 +65,24 @@ This project aims to audit:
 ## Disclaimer
 
 This project is designed for educational and defensive security purposes only.
+
+
+## Usage
+
+Audit an SSH server configuration file:
+
+```bash
+python src/cli.py ssh-config --config examples/sshd_config_secure
+```
+
+Audit a risky SSH configuration file:
+
+```bash
+python src/cli.py ssh-config --config examples/sshd_config_insecure
+```
+
+Audit an `authorized_keys` file:
+
+```bash
+python src/cli.py authorized-keys --file examples/authorized_keys_sample
+```
