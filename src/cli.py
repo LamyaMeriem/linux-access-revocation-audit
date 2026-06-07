@@ -13,6 +13,7 @@ from report import (
     build_full_audit_markdown_report,
     build_full_audit_report,
 )
+from local_audit import print_local_audit_summary, run_local_audit
 from authorized_keys import parse_authorized_keys, print_authorized_keys_report
 from users import audit_users, parse_group, parse_passwd, print_users_report
 from local_sources import collect_local_sources, print_local_sources_report
@@ -328,6 +329,23 @@ def main() -> None:
         "local-sources",
         help="Discover local Linux audit source files."
     )
+
+    local_audit_parser = subparsers.add_parser(
+        "local-audit",
+        help="Run a read-only audit on the local Linux system.",
+    )
+
+    local_audit_parser.add_argument(
+        "--output",
+        required=False,
+        help="Path to JSON output report.",
+    )
+
+    local_audit_parser.add_argument(
+        "--markdown",
+        required=False,
+        help="Path to Markdown output report.",
+    )
     args = parser.parse_args()
 
     if args.command == "ssh-config":
@@ -354,7 +372,18 @@ def main() -> None:
     elif args.command == "local-sources":
         sources = collect_local_sources()
         print_local_sources_report(sources)
+    elif args.command == "local-audit":
+        report = run_local_audit()
+        print_local_audit_summary(report)
 
+        if args.output:
+            write_json_report(report, args.output)
+            print(f"\n[OK] JSON report generated: {args.output}")
+
+        if args.markdown:
+            markdown = build_full_audit_markdown_report(report)
+            write_markdown_report(markdown, args.markdown)
+            print(f"[OK] Markdown report generated: {args.markdown}")
 
 if __name__ == "__main__":
     main()
