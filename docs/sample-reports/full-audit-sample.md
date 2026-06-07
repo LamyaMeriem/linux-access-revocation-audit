@@ -1,6 +1,6 @@
 # Linux Access Governance Full Audit Report
 
-**Generated at:** `2026-06-07T07:10:28.348826+00:00`
+**Generated at:** `2026-06-07T07:18:38.474027+00:00`
 **Governance score:** `0/100`
 
 ## Executive Summary
@@ -26,9 +26,9 @@
 
 ## Authorized Keys Review
 
-- **[INFO] Line 1** — ssh-ed25519 — `lamya@admin-laptop`
-- **[WARNING] Line 2** — ssh-ed25519 — `old-provider@agency`
-- **[WARNING] Line 3** — ssh-rsa — `test-key`
+- **[INFO] Line 1** — ssh-ed25519 — `SHA256:n4rakPO6w6CYuTyBE/WxA5RpVJYWjzeUXFHRnzU7bC4` — `lamya@admin-laptop`
+- **[WARNING] Line 2** — ssh-ed25519 — `SHA256:1fvK7SD4/uHk/b9+I2bdeMctGuIqd4+PJ+BwUB18NeE` — `old-provider@agency`
+- **[WARNING] Line 3** — ssh-rsa — `SHA256:C0BebhDDd0Hmo3ZGHdaw3sW7un8seOOiwB3DKx+RuYs` — `test-key`
 
 ## Users and Sudo Findings
 
