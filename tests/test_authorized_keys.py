@@ -1,5 +1,4 @@
-from src.authorized_keys import is_suspicious_comment, parse_authorized_keys
-
+from src.authorized_keys import is_suspicious_comment, parse_authorized_keys, calculate_fingerprint
 
 def test_parse_authorized_keys_extracts_key_information():
     content = """
@@ -40,3 +39,15 @@ def test_suspicious_comment_detection():
     assert is_suspicious_comment("old-provider@agency") is True
     assert is_suspicious_comment("test-key") is True
     assert is_suspicious_comment("lamya@admin-laptop") is False
+
+def test_calculate_fingerprint_returns_sha256_format():
+    fingerprint = calculate_fingerprint("QUJDRA==")
+
+    assert fingerprint.startswith("SHA256:")
+    assert fingerprint != "INVALID_KEY"
+
+
+def test_calculate_fingerprint_detects_invalid_key_body():
+    fingerprint = calculate_fingerprint("not-valid-base64!!!")
+
+    assert fingerprint == "INVALID_KEY"

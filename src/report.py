@@ -135,6 +135,7 @@ def build_authorized_keys_markdown_report(report: dict) -> str:
             continue
 
         lines.append(f"- **Type:** `{key['type']}`")
+        lines.append(f"- **Fingerprint:** `{key['fingerprint']}`")
         lines.append(f"- **Key preview:** `{key['key_preview']}`")
         lines.append(f"- **Comment:** `{key['comment'] or 'No comment'}`")
         lines.append(f"- **Suspicious:** `{key['suspicious']}`")
@@ -342,7 +343,7 @@ def build_full_audit_markdown_report(report: dict) -> str:
         severity = "WARNING" if key["suspicious"] else "INFO"
         lines.append(
             f"- **[{severity}] Line {key['line']}** — "
-            f"{key['type']} — `{key['comment'] or 'No comment'}`"
+            f"{key['type']} — `{key['fingerprint']}` — `{key['comment'] or 'No comment'}`"
         )
 
     lines.append("")
