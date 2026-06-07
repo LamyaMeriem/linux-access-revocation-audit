@@ -10,6 +10,8 @@ from report import (
     build_users_report,
     write_json_report,
     write_markdown_report,
+    build_full_audit_markdown_report,
+    build_full_audit_report,
 )
 from authorized_keys import parse_authorized_keys, print_authorized_keys_report
 from users import audit_users, parse_group, parse_passwd, print_users_report
@@ -125,6 +127,81 @@ def run_users_audit(
             write_markdown_report(markdown, markdown_path)
             print(f"[OK] Markdown report generated: {markdown_path}")
 
+def run_full_audit(
+    ssh_config_path: str,
+    authorized_keys_path: str,
+    passwd_path: str,
+    group_path: str,
+    output_path: str | None = None,
+    markdown_path: str | None = None,
+) -> None:
+    ssh_config_file = Path(ssh_config_path)
+    authorized_keys_file = Path(authorized_keys_path)
+    passwd_file = Path(passwd_path)
+    group_file = Path(group_path)
+
+    for file_path in [ssh_config_file, authorized_keys_file, passwd_file, group_file]:
+        if not file_path.exists():
+            print(f"[ERROR] File not found: {file_path}")
+            return
+
+    parsed_config = parse_sshd_config(
+        ssh_config_file.read_text(encoding="utf-8", errors="ignore")
+    )
+    ssh_findings = audit_sshd_config(parsed_config)
+    ssh_score = calculate_score(ssh_findings)
+
+    ssh_report = build_ssh_config_report(
+        config_path=str(ssh_config_file),
+        parsed_config=parsed_config,
+        findings=ssh_findings,
+        score=ssh_score,
+    )
+
+    keys = parse_authorized_keys(
+        authorized_keys_file.read_text(encoding="utf-8", errors="ignore")
+    )
+    keys_report = build_authorized_keys_report(
+        file_path=str(authorized_keys_file),
+        keys=keys,
+    )
+
+    users = parse_passwd(
+        passwd_file.read_text(encoding="utf-8", errors="ignore")
+    )
+    groups = parse_group(
+        group_file.read_text(encoding="utf-8", errors="ignore")
+    )
+    user_findings = audit_users(users, groups)
+
+    users_report = build_users_report(
+        passwd_path=str(passwd_file),
+        group_path=str(group_file),
+        users=users,
+        findings=user_findings,
+    )
+
+    full_report = build_full_audit_report(
+        ssh_report=ssh_report,
+        authorized_keys_report=keys_report,
+        users_report=users_report,
+    )
+
+    print("\n===== Linux Access Governance Full Audit =====")
+    print(f"Governance score: {full_report['governance_score']}/100")
+    print("\nSummary:")
+    for key, value in full_report["summary"].items():
+        print(f"- {key}: {value}")
+
+    if output_path:
+        write_json_report(full_report, output_path)
+        print(f"\n[OK] JSON report generated: {output_path}")
+
+    if markdown_path:
+        markdown = build_full_audit_markdown_report(full_report)
+        write_markdown_report(markdown, markdown_path)
+        print(f"[OK] Markdown report generated: {markdown_path}")
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Linux Access Governance Audit CLI"
@@ -207,6 +284,46 @@ def main() -> None:
         required=False,
         help="Path to Markdown output report.",
     )
+    full_parser = subparsers.add_parser(
+        "full-audit",
+        help="Run a complete Linux access governance audit."
+    )
+
+    full_parser.add_argument(
+        "--ssh-config",
+        required=True,
+        help="Path to sshd_config file."
+    )
+
+    full_parser.add_argument(
+        "--authorized-keys",
+        required=True,
+        help="Path to authorized_keys file."
+    )
+
+    full_parser.add_argument(
+        "--passwd",
+        required=True,
+        help="Path to passwd file."
+    )
+
+    full_parser.add_argument(
+        "--group",
+        required=True,
+        help="Path to group file."
+    )
+
+    full_parser.add_argument(
+        "--output",
+        required=False,
+        help="Path to JSON output report."
+    )
+
+    full_parser.add_argument(
+        "--markdown",
+        required=False,
+        help="Path to Markdown output report."
+    )
     args = parser.parse_args()
 
     if args.command == "ssh-config":
@@ -216,6 +333,15 @@ def main() -> None:
         run_authorized_keys_audit(args.file, args.output, args.markdown)
     elif args.command == "users":
         run_users_audit(
+            args.passwd,
+            args.group,
+            args.output,
+            args.markdown,
+        )
+    elif args.command == "full-audit":
+        run_full_audit(
+            args.ssh_config,
+            args.authorized_keys,
             args.passwd,
             args.group,
             args.output,

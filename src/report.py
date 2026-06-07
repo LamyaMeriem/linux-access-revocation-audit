@@ -260,3 +260,109 @@ def build_users_markdown_report(report: dict) -> str:
             lines.append("")
 
     return "\n".join(lines)
+
+def build_full_audit_report(
+    ssh_report: dict,
+    authorized_keys_report: dict,
+    users_report: dict,
+) -> dict:
+    user_critical = users_report["summary"]["critical"]
+    user_warning = users_report["summary"]["warning"]
+    suspicious_keys = authorized_keys_report["summary"]["suspicious_keys"]
+    invalid_keys = authorized_keys_report["summary"]["invalid_keys"]
+
+    governance_score = ssh_report["score"]
+    governance_score -= user_critical * 15
+    governance_score -= user_warning * 5
+    governance_score -= suspicious_keys * 10
+    governance_score -= invalid_keys * 5
+    governance_score = max(governance_score, 0)
+
+    return {
+        "audit_type": "full_access_governance",
+        "generated_at": ssh_report["generated_at"],
+        "governance_score": governance_score,
+        "summary": {
+            "ssh_critical": ssh_report["summary"]["critical"],
+            "ssh_warning": ssh_report["summary"]["warning"],
+            "suspicious_ssh_keys": suspicious_keys,
+            "invalid_ssh_keys": invalid_keys,
+            "users_critical": user_critical,
+            "users_warning": user_warning,
+            "interactive_users": users_report["summary"]["interactive_users"],
+        },
+        "modules": {
+            "ssh_config": ssh_report,
+            "authorized_keys": authorized_keys_report,
+            "users": users_report,
+        },
+    }
+
+
+def build_full_audit_markdown_report(report: dict) -> str:
+    lines = []
+
+    lines.append("# Linux Access Governance Full Audit Report")
+    lines.append("")
+    lines.append(f"**Generated at:** `{report['generated_at']}`")
+    lines.append(f"**Governance score:** `{report['governance_score']}/100`")
+    lines.append("")
+
+    lines.append("## Executive Summary")
+    lines.append("")
+    lines.append(f"- SSH critical findings: **{report['summary']['ssh_critical']}**")
+    lines.append(f"- SSH warnings: **{report['summary']['ssh_warning']}**")
+    lines.append(f"- Suspicious SSH keys: **{report['summary']['suspicious_ssh_keys']}**")
+    lines.append(f"- Invalid SSH keys: **{report['summary']['invalid_ssh_keys']}**")
+    lines.append(f"- Users critical findings: **{report['summary']['users_critical']}**")
+    lines.append(f"- Users warnings: **{report['summary']['users_warning']}**")
+    lines.append(f"- Interactive users: **{report['summary']['interactive_users']}**")
+    lines.append("")
+
+    lines.append("## Key Question")
+    lines.append("")
+    lines.append("> Who can still access this Linux server, how, and with which privileges?")
+    lines.append("")
+
+    lines.append("## SSH Configuration Findings")
+    lines.append("")
+
+    for finding in report["modules"]["ssh_config"]["findings"]:
+        lines.append(f"- **[{finding['severity']}] {finding['control']}** — {finding['message']}")
+
+    lines.append("")
+    lines.append("## Authorized Keys Review")
+    lines.append("")
+
+    for key in report["modules"]["authorized_keys"]["keys"]:
+        if key["status"] == "invalid":
+            lines.append(f"- **[WARNING] Line {key['line']}** — invalid SSH key entry")
+            continue
+
+        severity = "WARNING" if key["suspicious"] else "INFO"
+        lines.append(
+            f"- **[{severity}] Line {key['line']}** — "
+            f"{key['type']} — `{key['comment'] or 'No comment'}`"
+        )
+
+    lines.append("")
+    lines.append("## Users and Sudo Findings")
+    lines.append("")
+
+    for finding in report["modules"]["users"]["findings"]:
+        lines.append(f"- **[{finding['severity']}] {finding['control']}** — {finding['message']}")
+
+    lines.append("")
+    lines.append("## Recommended Next Actions")
+    lines.append("")
+
+    lines.append("- Review all suspicious SSH keys and confirm ownership.")
+    lines.append("- Remove unmanaged or obsolete keys from `authorized_keys`.")
+    lines.append("- Confirm every interactive Linux account has a valid business owner.")
+    lines.append("- Review all users with sudo privileges.")
+    lines.append("- Disable direct root SSH login.")
+    lines.append("- Disable password-based SSH authentication when key-based access is validated.")
+    lines.append("- Restrict SSH access with `AllowUsers` or `AllowGroups`.")
+    lines.append("")
+
+    return "\n".join(lines)
