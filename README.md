@@ -71,6 +71,8 @@ This tool helps answer:
 - Static analysis with Ruff
 - GitHub Actions CI
 - Full audit command combining SSH config, authorized keys, users, and sudo exposure
+- Local read-only audit mode
+- Local Linux audit source discovery
 
 ## Audit Modules
 
@@ -272,6 +274,28 @@ python src/cli.py full-audit \
   --output reports/full-audit.json \
   --markdown reports/full-audit.md
 ```
+### Run a local read-only audit
+
+```bash
+python src/cli.py local-audit
+```
+
+Generate local audit reports:
+
+```bash
+python src/cli.py local-audit \
+  --output reports/local-audit.json \
+  --markdown reports/local-audit.md
+```
+
+This command runs in read-only mode and attempts to discover local Linux audit sources such as:
+
+- `/etc/ssh/sshd_config`
+- `/etc/passwd`
+- `/etc/group`
+- `/home/*/.ssh/authorized_keys`
+- `/root/.ssh/authorized_keys`
+
 
 ## Sample Reports
 
@@ -353,6 +377,7 @@ Workflow file:
 - [x] Markdown report generation
 - [x] Sample Markdown reports
 - [x] Full audit command combining all modules
+- [x] Local read-only audit mode
 - [ ] Advanced Linux access audit
 - [ ] Remote server audit mode
 - [ ] Dockerized execution
