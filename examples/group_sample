@@ -1,0 +1,5 @@
+root:x:0:
+sudo:x:27:lamya,old-provider
+www-data:x:33:
+deployers:x:1001:deploy
+ssh-users:x:1002:lamya,deploy,old-provider

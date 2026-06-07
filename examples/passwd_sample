@@ -1,0 +1,7 @@
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+lamya:x:1000:1000:Lamya Admin:/home/lamya:/bin/bash
+deploy:x:1001:1001:Deploy User:/home/deploy:/bin/bash
+old-provider:x:1002:1002:Old Provider:/home/old-provider:/bin/bash
+backup:x:1003:1003:Backup Account:/home/backup:/usr/sbin/nologin

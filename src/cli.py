@@ -10,7 +10,7 @@ from report import (
     write_markdown_report,
 )
 from authorized_keys import parse_authorized_keys, print_authorized_keys_report
-
+from users import audit_users, parse_group, parse_passwd, print_users_report
 
 def run_ssh_config_audit(
     config_path: str,
@@ -79,6 +79,23 @@ def run_authorized_keys_audit(
             write_markdown_report(markdown, markdown_path)
             print(f"[OK] Markdown report generated: {markdown_path}")
 
+def run_users_audit(passwd_path: str, group_path: str) -> None:
+    passwd_file = Path(passwd_path)
+    group_file = Path(group_path)
+
+    if not passwd_file.exists():
+        print(f"[ERROR] passwd file not found: {passwd_file}")
+        return
+
+    if not group_file.exists():
+        print(f"[ERROR] group file not found: {group_file}")
+        return
+
+    users = parse_passwd(passwd_file.read_text(encoding="utf-8", errors="ignore"))
+    groups = parse_group(group_file.read_text(encoding="utf-8", errors="ignore"))
+    findings = audit_users(users, groups)
+
+    print_users_report(users, findings)
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -134,6 +151,24 @@ def main() -> None:
         required=False,
         help="Path to Markdown output report."
     )
+
+    users_parser = subparsers.add_parser(
+        "users",
+        help="Audit Linux users and sudo exposure."
+    )
+
+    users_parser.add_argument(
+        "--passwd",
+        required=True,
+        help="Path to passwd file."
+    )
+
+    users_parser.add_argument(
+        "--group",
+        required=True,
+        help="Path to group file."
+    )
+
     args = parser.parse_args()
 
     if args.command == "ssh-config":
@@ -141,7 +176,8 @@ def main() -> None:
 
     elif args.command == "authorized-keys":
         run_authorized_keys_audit(args.file, args.output, args.markdown)
-
+    elif args.command == "users":
+        run_users_audit(args.passwd, args.group)
 
 if __name__ == "__main__":
     main()
