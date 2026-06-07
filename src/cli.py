@@ -15,7 +15,7 @@ from report import (
 )
 from authorized_keys import parse_authorized_keys, print_authorized_keys_report
 from users import audit_users, parse_group, parse_passwd, print_users_report
-
+from local_sources import collect_local_sources, print_local_sources_report
 def run_ssh_config_audit(
     config_path: str,
     output_path: str | None = None,
@@ -324,6 +324,10 @@ def main() -> None:
         required=False,
         help="Path to Markdown output report."
     )
+    subparsers.add_parser(
+        "local-sources",
+        help="Discover local Linux audit source files."
+    )
     args = parser.parse_args()
 
     if args.command == "ssh-config":
@@ -347,6 +351,10 @@ def main() -> None:
             args.output,
             args.markdown,
         )
+    elif args.command == "local-sources":
+        sources = collect_local_sources()
+        print_local_sources_report(sources)
+
 
 if __name__ == "__main__":
     main()
