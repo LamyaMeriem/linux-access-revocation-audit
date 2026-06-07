@@ -70,6 +70,7 @@ This tool helps answer:
 - Unit tests with Pytest
 - Static analysis with Ruff
 - GitHub Actions CI
+- Full audit command combining SSH config, authorized keys, users, and sudo exposure
 
 ## Audit Modules
 
@@ -260,6 +261,17 @@ python src/cli.py users \
   --output reports/users.json \
   --markdown reports/users.md
 ```
+### Run a full Linux access governance audit
+
+```bash
+python src/cli.py full-audit \
+  --ssh-config examples/sshd_config_insecure \
+  --authorized-keys examples/authorized_keys_sample \
+  --passwd examples/passwd_sample \
+  --group examples/group_sample \
+  --output reports/full-audit.json \
+  --markdown reports/full-audit.md
+```
 
 ## Sample Reports
 
@@ -268,6 +280,7 @@ Sample Markdown reports are available in the repository:
 - [SSH insecure configuration sample](docs/sample-reports/ssh-config-insecure-sample.md)
 - [Authorized keys sample](docs/sample-reports/authorized-keys-sample.md)
 - [Linux users and sudo sample](docs/sample-reports/users-sudo-sample.md)
+- [Full access governance audit sample](docs/sample-reports/full-audit-sample.md)
 
 ## Example Findings
 
@@ -339,7 +352,7 @@ Workflow file:
 - [x] JSON report generation
 - [x] Markdown report generation
 - [x] Sample Markdown reports
-- [ ] Full audit command combining all modules
+- [x] Full audit command combining all modules
 - [ ] Advanced Linux access audit
 - [ ] Remote server audit mode
 - [ ] Dockerized execution
